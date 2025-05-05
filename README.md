@@ -29,9 +29,8 @@ This ASP.NET Core MVC application lets users:
 1. Clone the repo:
 
    ```bash
-   git clone https://github.com/<your‑org>/job‑tracker.git
-   cd job‑tracker
-   ```
+   git clone https://github.com/Elias10Afshar/CSCI3110TermProject.git
+   cd CSCI3110TermProject
 
 2. Configure connection string in appsettings.Development.json
 
