@@ -1,0 +1,156 @@
+﻿@model IEnumerable<CSCI3110TermProject.Data.JobApplication>
+@{
+    ViewData["Title"] = "Job Applications";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Create New</a>
+</p>
+
+<div class="mb-3">
+    <input id="searchBox"
+           class="form-control"
+           placeholder="Search by company, position, or tag…"
+           autocomplete="off"
+           value="@(Context.Request.Query["searchTerm"])" />
+</div>
+
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th><a href="#" data-sort="CompanyName">Company</a></th>
+                <th><a href="#" data-sort="Position">Position</a></th>
+                <th><a href="#" data-sort="DateApplied">Date Applied</a></th>
+                <th>Tags</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="applicationsBody">
+            <tr><td colspan="5" class="text-center">Loading…</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<nav aria-label="Pagination">
+    <ul class="pagination" id="pagination"></ul>
+</nav>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const searchBox = document.getElementById("searchBox");
+            const tbody = document.getElementById("applicationsBody");
+            const pagination = document.getElementById("pagination");
+
+            let page = 1,
+                pageSize = 5,
+                sortBy = "DateApplied",
+                sortDir = "desc";
+
+            // 1) Sorting links
+            document.querySelectorAll("th a[data-sort]").forEach(link => {
+                link.addEventListener("click", e => {
+                    e.preventDefault();
+                    const key = link.dataset.sort;
+                    if (sortBy === key) {
+                        sortDir = (sortDir === "asc") ? "desc" : "asc";
+                    } else {
+                        sortBy = key; sortDir = "asc";
+                    }
+                    page = 1; loadApps();
+                });
+            });
+
+            // 2) Live search
+            searchBox.addEventListener("input", () => {
+                page = 1; loadApps();
+            });
+
+            // 3) Pagination renderer
+            function renderPagination(totalCount) {
+                const totalPages = Math.ceil(totalCount / pageSize);
+                let html = "";
+                for (let p = 1; p <= totalPages; p++) {
+                    html += `<li class="page-item ${p === page ? "active" : ""}">
+                                        <a class="page-link" href="#">${p}</a>
+                                     </li>`;
+                }
+                pagination.innerHTML = html;
+                pagination.querySelectorAll("a.page-link").forEach(a => {
+                    a.addEventListener("click", e => {
+                        e.preventDefault();
+                        const np = +a.textContent;
+                        if (np !== page) { page = np; loadApps(); }
+                    });
+                });
+            }
+
+            // 4) Fetch + render
+            async function loadApps() {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center">Loading…</td></tr>`;
+                const term = encodeURIComponent(searchBox.value.trim());
+                const url = `/api/JobApplicationsApi`
+                    + `?searchTerm=${term}`
+                    + `&page=${page}`
+                    + `&pageSize=${pageSize}`
+                    + `&sortBy=${sortBy}`
+                    + `&sortDir=${sortDir}`;
+
+                try {
+                    const resp = await fetch(url);
+                    const { totalCount, items } = await resp.json();
+
+                    if (!items.length) {
+                        tbody.innerHTML = `<tr><td colspan="5" class="text-center">No applications found</td></tr>`;
+                    } else {
+                        // Badge color mapping
+                        const badgeClassMap = {
+                            InterviewScheduled: "bg-primary",
+                            FollowUpDone: "bg-info",
+                            OfferReceived: "bg-warning"
+                        };
+
+                        tbody.innerHTML = items.map(item => {
+                            // Build badges
+                            const badges = item.tags
+                                .map(raw => {
+                                    // Humanize PascalCase → "Follow Up Done"
+                                    const label = raw.replace(/([A-Z])/g, ' $1').trim();
+                                    // Pick color or fall back
+                                    const cls = badgeClassMap[raw] || "bg-secondary";
+                                    return `<span class="badge ${cls} me-1">${label}</span>`;
+                                })
+                                .join("");
+
+                            return `
+                                        <tr>
+                                          <td>${item.companyName}</td>
+                                          <td>${item.position}</td>
+                                          <td>${new Date(item.dateApplied).toLocaleDateString()}</td>
+                                          <td>${badges}</td>
+                                          <td>
+                                            <a class="btn btn-info btn-sm"    href="/JobApplications/Details/${item.id}">Details</a>
+                                            <a class="btn btn-warning btn-sm" href="/JobApplications/Edit/${item.id}">Edit</a>
+                                            <a class="btn btn-danger btn-sm"  href="/JobApplications/Delete/${item.id}">Delete</a>
+                                          </td>
+                                        </tr>`;
+                        }).join("");
+                    }
+
+                    renderPagination(totalCount);
+                } catch (err) {
+                    console.error("Failed to load apps:", err);
+                    tbody.innerHTML = `<tr><td colspan="5" class="text-danger text-center">
+                                                    Error loading data
+                                                 </td></tr>`;
+                }
+            }
+
+            // Initial load
+            loadApps();
+        });
+    </script>
+}

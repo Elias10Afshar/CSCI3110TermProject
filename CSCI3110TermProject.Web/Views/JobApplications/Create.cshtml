@@ -1,0 +1,70 @@
+﻿@model CSCI3110TermProject.Data.JobApplication
+@{
+    ViewData["Title"] = "Create Job Application";
+}
+<h1>@ViewData["Title"]</h1>
+
+<form asp-action="Create" method="post">
+    @Html.AntiForgeryToken()
+
+    <div class="mb-3">
+        <label asp-for="CompanyName" class="form-label"></label>
+        <input asp-for="CompanyName" class="form-control" />
+        <span asp-validation-for="CompanyName" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Position" class="form-label"></label>
+        <input asp-for="Position" class="form-control" />
+        <span asp-validation-for="Position" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="DateApplied" class="form-label"></label>
+        <input asp-for="DateApplied" class="form-control" type="date" />
+        <span asp-validation-for="DateApplied" class="text-danger"></span>
+    </div>
+
+    <!-- Tags container (no hidden field needed!) -->
+    <div class="mb-3">
+        <label class="form-label">Tags</label>
+        <div id="tagsContainer">
+            <!-- JS will inject checkboxes here -->
+        </div>
+    </div>
+
+    <button class="btn btn-primary" type="submit">Create</button>
+    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            const tagsContainer = document.getElementById("tagsContainer");
+
+            // Fetch all tags from API
+            const resp = await fetch("/api/TagsApi");
+            const tags = await resp.json();
+
+            // Render each as a checkbox with name="SelectedTagIds"
+            tags.forEach(tag => {
+                const id = `tag_${tag.id}`;
+                const wrapper = document.createElement("div");
+                wrapper.className = "form-check form-check-inline";
+                wrapper.innerHTML = `
+                    <input name="SelectedTagIds"
+                           class="form-check-input"
+                           type="checkbox"
+                           value="${tag.id}"
+                           id="${id}">
+                    <label class="form-check-label" for="${id}">${tag.name}</label>
+                  `;
+                tagsContainer.appendChild(wrapper);
+            });
+        });
+    </script>
+}

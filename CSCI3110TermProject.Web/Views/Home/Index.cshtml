@@ -1,8 +1,80 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model CSCI3110TermProject.Web.Models.DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="jumbotron bg-light p-5 rounded mb-4">
+    <h1 class="display-4">Track Your Job Applications</h1>
+    <p class="lead">
+        Keep all your job applications, follow‑ups and offers in one place.
+        Use the Dashboard for an overview, or head straight to
+        <a asp-controller="JobApplications" asp-action="Index">Job Applications</a>.
+    </p>
+    <hr class="my-4" />
+    <ul>
+        <li>View total applications by status</li>
+        <li>Filter by company, position or tag</li>
+        <li>Add, edit or delete any entry</li>
+    </ul>
+    <a class="btn btn-primary btn-lg" asp-controller="JobApplications" asp-action="Index">
+        View All Applications
+    </a>
 </div>
+
+<h1>@ViewData["Title"]</h1>
+
+<div class="row mb-4">
+    <!-- Total Applications card -->
+    <div class="col-md-4">
+        <a asp-controller="JobApplications"
+           asp-action="Index"
+           class="text-decoration-none text-reset">
+            <div class="card h-100" style="cursor: pointer;">
+                <div class="card-body">
+                    <h5 class="card-title">Total Applications</h5>
+                    <p class="display-4">@Model.TotalApplications</p>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <!-- One card per tag -->
+    @foreach (var kvp in Model.ApplicationsByTag)
+    {
+        var name = kvp.Key;
+        var count = kvp.Value;
+        // calculate percentage (rounded down)
+        var pct = (int)(count * 100m / (Model.TotalApplications == 0 ? 1 : Model.TotalApplications));
+
+        <div class="col-md-4 mb-3">
+            <a asp-controller="JobApplications"
+               asp-action="Index"
+               asp-route-searchTerm="@name"
+               class="text-decoration-none text-reset">
+                <div class="card h-100" style="cursor: pointer;">
+                    <div class="card-body">
+                        <h5 class="card-title">@name</h5>
+                        <div class="progress">
+                            <div class="progress-bar"
+                                 role="progressbar"
+                                 style="width:@pct% "
+                                 aria-valuenow="@count"
+                                 aria-valuemin="0"
+                                 aria-valuemax="@Model.TotalApplications">
+                                @count
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    }
+</div>
+
+<p>
+    <a asp-controller="JobApplications"
+       asp-action="Index"
+       class="btn btn-primary">
+        View All Applications
+    </a>
+</p>

@@ -1,22 +1,227 @@
+﻿/* ───────────────────────────────────────────────────────────────────────────
+   ETSU Brand Overrides
+   Setting up our custom CSS variables to match ETSU’s official color palette.
+─────────────────────────────────────────────────────────────────────────── */
+:root {
+    /* primary = ETSU navy blue */
+    --bs-primary: #012169;
+    /* warning = ETSU gold */
+    --bs-warning: #FFC72C;
+    /* default link color uses our navy blue */
+    --bs-link-color: var(--bs-primary);
+    /* link hover is ~10% darker for a subtle effect */
+    --bs-link-hover-color: #001545;
+}
+
+/* Ensure all anchor tags and nav links use our custom link color */
+a,
+.nav-link {
+    color: var(--bs-link-color);
+}
+
+    a:hover,
+    .nav-link:hover {
+        /* enforce the hover color and override any other styles */
+        color: var(--bs-link-hover-color) !important;
+    }
+
+/*
+   Button Styles
+   Override Bootstrap’s default primary and warning buttons
+   to use our ETSU colors.
+*/
+.btn-primary {
+    /* base state uses our navy blue */
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+}
+
+    .btn-primary:hover,
+    .btn-primary:focus {
+        /* darker navy on hover/focus for visual feedback */
+        background-color: #001545;
+        border-color: #001545;
+    }
+
+.btn-warning {
+    /* warning buttons use ETSU gold */
+    background-color: var(--bs-warning);
+    border-color: var(--bs-warning);
+}
+
+    .btn-warning:hover,
+    .btn-warning:focus {
+        /* slightly darker gold on hover/focus */
+        background-color: #e6b523;
+        border-color: #e6b523;
+    }
+
+/* 
+   Navbar Text Colors
+   Make sure brand name and nav links reflect ETSU styling.
+ */
+.navbar-brand,
+.navbar-nav .nav-link {
+    /* navy for default navbar items */
+    color: var(--bs-primary) !important;
+}
+
+    .navbar-nav .nav-link.active,
+    .navbar-nav .nav-link:hover {
+        /* gold highlight for active or hovered items */
+        color: var(--bs-warning) !important;
+    }
+
+/* 
+   Progress Bars
+   Match progress indicators to our primary color.
+*/
+.progress-bar {
+    background-color: var(--bs-primary) !important;
+}
+
+/* 
+   Card Styles (optional dashboard tweaks)
+   Light border and header background using brand colors.*/
+.card {
+    /* subtle navy border */
+    border-color: rgba(1,33,105,0.2);
+}
+
+.card-header {
+    /* light gold background and gold bottom border */
+    background-color: #fff8e1;
+    border-bottom: 2px solid var(--bs-warning);
+}
+
+/*
+   Global Utilities (focus styles, skip-link, typography, spacing)
+*/
 html {
-  font-size: 14px;
+    font-size: 14px;
+    position: relative;
+    min-height: 100%;
 }
 
 @media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
-
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
+    /* slightly larger base font on tablets and up */
+    html {
+        font-size: 16px;
+    }
 }
 
 body {
-  margin-bottom: 60px;
+    /* ensure footer isn’t covered */
+    margin-bottom: 60px;
+}
+
+/* Improve focus outlines for accessibility */
+.btn:focus,
+.btn:active:focus,
+.btn-link.nav-link:focus,
+.form-control:focus,
+.form-check-input:focus,
+a:focus,
+.page-link:focus {
+    outline: 3px solid rgba(0,123,255,0.75) !important;
+    outline-offset: 2px;
+    /* double-shadow for contrast against backgrounds */
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem var(--bs-primary);
+}
+
+/* Skip link that appears when focused (for screen-reader users) */
+.skip-link {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    background: #003366;
+    color: white;
+    padding: 8px;
+    z-index: 100;
+    transition: top 0.3s;
+}
+
+    .skip-link:focus {
+        /* slide into view on keyboard focus */
+        top: 0;
+    }
+
+/* Visually hidden but focusable elements (e.g., skip links) */
+.visually-hidden-focusable {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+}
+
+    .visually-hidden-focusable:focus {
+        position: static;
+        width: auto;
+        height: auto;
+        margin: 1rem;
+        padding: .5rem 1rem;
+        background: var(--bs-primary);
+        color: white;
+        text-decoration: none;
+        z-index: 1000;
+    }
+
+/* Simple typography tweaks */
+h1, h2, h3 {
+    font-weight: 300;
+    margin-bottom: 1rem;
+}
+
+.container {
+    /* consistent vertical padding */
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
+}
+
+/* 
+   Badge and Table Cell Styling
+   Tweak badges, table cells, and card titles to match brand.
+*/
+.badge {
+    margin: 0 0.25rem 0.25rem 0;
+    text-transform: capitalize;
+    font-size: 0.85em;
+}
+
+th, td {
+    padding: 0.75rem 1rem;
+}
+
+    /* Make the fourth column header link use our brand colors */
+    th:nth-child(4) a {
+        color: var(--bs-primary);
+        font-weight: 500;
+    }
+
+        th:nth-child(4) a:hover {
+            color: var(--bs-warning);
+        }
+
+.card .card-title {
+    /* ensure card titles stand out in primary color */
+    color: var(--bs-primary);
+}
+
+/* Badge color variations to align with ETSU palette */
+.badge.bg-primary {
+    background-color: var(--bs-primary) !important;
+}
+
+.badge.bg-warning {
+    background-color: var(--bs-warning) !important;
+}
+
+.badge.bg-info {
+    /* alternative brand blue if used */
+    background-color: #258cfb !important;
+}
+
+.badge.bg-secondary {
+    background-color: rgba(0,0,0,0.2) !important;
 }
